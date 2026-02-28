@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>QR Simple</title>
+  <link rel="stylesheet" href="/static/styles.css"/>
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <div class="badge">QR</div>
+      <div>
+        <h1>QR Simple</h1>
+        <p>Pegá un link y generá tu QR. Para más opciones, iniciá sesión.</p>
+      </div>
+        <div class="auth">
+        <a class="btn ghost" href="/login">Login</a>
+        <a class="btn" href="/register">Registro</a>
+        </div>
+    </header>
+
+    <section class="card">
+      <label class="label">Link (URL)</label>
+      <div class="row">
+        <input id="url" class="input" placeholder="https://..." />
+        <button id="btn" class="btn">Generar</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="qr-area">
+        <div class="qr-box">
+          <div id="qr"></div>
+          <div class="tiny" id="out"></div>
+        </div>
+        <div>
+          <div id="status" class="status"></div>
+          <div class="tiny">
+            🔒 ¿Querés WhatsApp/WiFi/Texto/vCard, expiración, stats y editar destino?  
+            <a href="/login">Iniciá sesión</a>.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script>
+    const urlEl = document.getElementById("url");
+    const btn = document.getElementById("btn");
+    const qrEl = document.getElementById("qr");
+    const out = document.getElementById("out");
+    const statusEl = document.getElementById("status");
+
+    function setStatus(msg, ok=true){
+      statusEl.textContent = msg;
+      statusEl.className = ok ? "status" : "status bad";
+    }
+
+    function normalizeUrl(s){
+      let t = (s||"").trim();
+      if(!t) return "";
+      if(!t.includes("://") && /^[a-z0-9.-]+\.[a-z]{2,}([/:?].*)?$/i.test(t)){
+        t = "https://" + t;
+      }
+      return t;
+    }
+
+    btn.addEventListener("click", async () => {
+      const raw = normalizeUrl(urlEl.value);
+      if(!raw){ setStatus("Pegá un link primero 😅", false); return; }
+
+      setStatus("Creando...");
+      const r = await fetch("/api/create", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ kind:"url", target_url: raw })
+      });
+      const j = await r.json();
+
+      if(!j.ok){
+        setStatus(j.error || "Error", false);
+        return;
+      }
+
+      qrEl.innerHTML = "";
+        const size = Math.min(260, Math.floor(window.innerWidth - 80));
+        new QRCode(qrEl, { text: j.short_url, width: size, height: size });
+      out.textContent = j.short_url;
+      setStatus("Listo ✅");
+    });
+
+    urlEl.addEventListener("keydown", (e)=> {
+      if(e.key === "Enter") btn.click();
+    });
+
+    setStatus("Pegá un link y generá tu QR ✅");
+  </script>
+</body>
+</html>

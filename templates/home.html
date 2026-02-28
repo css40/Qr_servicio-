@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>QR Pro</title>
+  <link rel="stylesheet" href="/static/styles.css"/>
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <div class="badge">QR</div>
+      <div>
+        <h1>QR Pro</h1>
+        <p>
+          {% if logged %}
+            Logueado como <b>{{ username }}</b> · <a href="/dashboard">Dashboard</a> · <a href="/logout">Salir</a>
+          {% else %}
+            Invitado: solo QR de <b>links</b>. · <a href="/login">Login</a> · <a href="/register">Registro</a>
+          {% endif %}
+        </p>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="grid2">
+        <div>
+          <label class="label">Tipo</label>
+          <select id="kind" class="input">
+            <option value="url">URL (Link)</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="wifi">WiFi</option>
+            <option value="text">Texto</option>
+            <option value="vcard">Contacto (vCard)</option>
+          </select>
+          <div class="tiny" id="modeHint"></div>
+        </div>
+
+        <div>
+          <label class="label">Título</label>
+          <input id="title" class="input" placeholder="Opcional "/>
+        </div>
+      </div>
+
+      <div id="fields" class="fields"></div>
+
+      <div class="grid2">
+        <div>
+          <label class="label">Expira en (min)</label>
+          <input id="expires_in" type="number" class="input" min="1" placeholder="Ej: 60"/>
+        </div>
+        <div>
+          <label class="label">Máx scans</label>
+          <input id="max_scans" type="number" class="input" min="1" placeholder="Ej: 100"/>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button id="btnCreate" class="btn">Crear QR</button>
+        <button id="btnCopy" class="btn ghost" disabled>Copiar link</button>
+        <button id="btnDownload" class="btn ghost" disabled>Descargar QR</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="qr-area">
+        <div class="qr-box">
+          <div id="qr"></div>
+          <div class="tiny" id="shortUrl"></div>
+        </div>
+        <div>
+          <div id="status" class="status"></div>
+          
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    window.__LOGGED__ = {{ 'true' if logged else 'false' }};
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

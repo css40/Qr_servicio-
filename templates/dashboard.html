@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/static/styles.css"/>
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <div class="badge">DB</div>
+      <div>
+        <h1>Dashboard</h1>
+        <p>Hola <b>{{ username }}</b> · <a href="/">Crear QR</a> · <a href="/logout">Salir</a></p>
+      </div>
+    </header>
+
+    <section class="card">
+      {% if links|length == 0 %}
+        <div class="tiny">Todavía no tenés QRs. <a href="/">Creá uno</a>.</div>
+      {% endif %}
+
+      <div class="historyList">
+        {% for l in links %}
+        <div class="hitem">
+          <div class="top">
+            <div>
+              <strong>{{ l['title'] or l['code'] }}</strong>
+              <div class="tiny">{{ app_url }}/r/{{ l['code'] }}</div>
+              <div class="tiny">Tipo: {{ l['kind'] }} {% if l['viewer_enabled'] == 1 %}(viewer){% endif %}</div>
+            </div>
+            <button class="mini" onclick="loadStats('{{ l['code'] }}')">Stats</button>
+          </div>
+
+          {% if l['viewer_enabled'] == 0 %}
+          <div class="meta">Destino: {{ l['target_url'] }}</div>
+          <div class="row" style="margin-top:10px;">
+            <input id="t-{{l['code']}}" class="input" value="{{ l['target_url'] }}"/>
+            <button class="btn ghost" onclick="updateLink('{{ l['code'] }}')">Actualizar destino</button>
+          </div>
+          {% else %}
+          <div class="meta">Payload: <a href="/v/{{ l['code'] }}">Ver</a></div>
+          {% endif %}
+
+          <div id="s-{{l['code']}}" class="status"></div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+
+  <script>
+  async function loadStats(code){
+    const el = document.getElementById("s-"+code);
+    el.textContent = "Cargando...";
+    const r = await fetch("/api/stats/" + code);
+    const j = await r.json();
+    if(!j.ok){ el.textContent = j.error || "Error"; return; }
+
+    const exp = j.expires_at ? new Date(j.expires_at*1000).toLocaleString() : "No";
+    const mx = (j.max_scans === null || j.max_scans === undefined) ? "No" : j.max_scans;
+    el.textContent = `Scans: ${j.total_scans} | Expira: ${exp} | Max: ${mx}`;
+  }
+
+  async function updateLink(code){
+    const el = document.getElementById("s-"+code);
+    const v = document.getElementById("t-"+code).value;
+    el.textContent = "Actualizando...";
+    const r = await fetch("/api/update", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ code, target_url: v })
+    });
+    const j = await r.json();
+    el.textContent = j.ok ? "Actualizado ✅" : (j.error || "Error");
+  }
+  </script>
+</body>
+</html>

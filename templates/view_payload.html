@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Viewer</title>
+  <link rel="stylesheet" href="/static/styles.css"/>
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <div class="badge">V</div>
+      <div>
+        <h1>{{ link['title'] or link['code'] }}</h1>
+        <p>Link: {{ app_url }}/r/{{ link['code'] }}</p>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="label">Tipo: {{ link['kind'] }}</div>
+
+      <div class="divider"></div>
+
+      <pre class="pre" id="payload">{{ payload_pretty }}</pre>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" onclick="copyPayload()">Copiar</button>
+        <a class="btn ghost" href="/">Crear otro</a>
+      </div>
+
+      <div id="status" class="status"></div>
+    </section>
+  </main>
+
+<script>
+function copyPayload(){
+  const t = document.getElementById("payload").innerText;
+  navigator.clipboard.writeText(t).then(()=>{
+    document.getElementById("status").textContent = "Copiado ✅";
+  }).catch(()=>{
+    document.getElementById("status").textContent = "No pude copiar 😵";
+  });
+}
+</script>
+</body>
+</html>

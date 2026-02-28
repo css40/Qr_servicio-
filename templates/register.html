@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Registro</title><link rel="stylesheet" href="/static/styles.css"/></head>
+<body>
+<main class="wrap">
+  <section class="card">
+    <h2>Registro</h2>
+    {% if error %}<div class="status bad">{{ error }}</div>{% endif %}
+    <form method="POST" action="/register" class="fields">
+      <input class="input" name="username" placeholder="Usuario (>=3)" required/>
+      <input class="input" name="password" type="password" placeholder="Contraseña (>=4)" required/>
+      <div class="row">
+        <button class="btn" type="submit">Crear</button>
+        <a class="btn ghost" href="/login">Ya tengo cuenta</a>
+        <a class="btn ghost" href="/">Volver</a>
+      </div>
+    </form>
+  </section>
+</main>
+</body></html>
