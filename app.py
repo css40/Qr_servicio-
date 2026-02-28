@@ -72,7 +72,9 @@ def init_db():
     conn.commit()
     conn.close()
 
-
+def get_base_url():
+    # Si APP_URL está seteado úsalo; si no, usa el host real (Render/Local)
+    return (APP_URL or request.url_root.rstrip("/"))
 @app.before_request
 def ensure_db():
     if not os.path.exists(DB):
@@ -286,7 +288,7 @@ def api_create():
     conn.commit()
     conn.close()
 
-    short_url = f"{APP_URL}/r/{code}"
+    short_url = f"{get_base_url()}/r/{code}"
     return jsonify({"ok": True, "code": code, "short_url": short_url, "guest": (uid == 0)})
 
 @app.get("/simple")
